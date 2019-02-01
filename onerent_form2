@@ -1,0 +1,349 @@
+<?php
+function related_article( $atts, $content = null ) {
+	$a = shortcode_atts( array(
+        'post' => ''
+        ), $atts );
+        $related_post = get_post($a['post']);
+        // print_r($related_post);
+        ob_start();   
+        ?>
+        <div class="single-related-post">
+                <div class="related-post-image">
+                        <?php echo get_the_post_thumbnail($related_post->ID, 'medium'); ?>
+                </div>
+                <div class="related-post-title">
+                        Related: <a href="<?php echo get_permalink($related_post->ID); ?>"><?php echo $related_post->post_title; ?></a>
+                </div>
+        </div>
+
+        <?php
+        $related = ob_get_clean();
+        return $related;
+}
+add_shortcode('related_article', 'related_article');
+function button_shortcode( $atts, $content = null ) {
+	$a = shortcode_atts( array(
+        'class' => '',
+        'link'  => '#',
+        'align' => 'center',
+        'width' => 'inherit',
+        'font-weight'   => 'bold',
+        "right"         => 'inherit',
+        'type'          => '',
+        'src'           => '',
+        'target'        => '',
+        'style'         => '',
+        ), $atts );
+        if($a['type'] == 'video-popup' && !empty($atts['src'])){
+               
+                $a['class'] .= ' video-popup';
+                $a['link']   = $a['src'];
+        }
+	return '<a target="'.$a['target'].'" style="width:'.$a['width'].'; font-weight:'.$a['font-weight'].'; margin-right:'.$a['right'].';'.$a['style'].'" href="'.$a['link'].'" class="button ' . esc_attr($a['class']) . ' align'.$a['align'].' ">' . $content . '</a>';
+}
+add_shortcode('onerent_button', 'button_shortcode');
+function onerent_lyop( $atts ){
+        $a = shortcode_atts( array(
+                'class' => '',
+                'title'  => 'Property Address',
+                'placeholder'   => '',
+                'button_text'   => 'Submit',
+        ), $atts );
+        ob_start();        
+?>
+        <div class="lyop-form-wrapper">
+                <span class="lyop-title">
+                        <?php echo $a['title']; ?>
+                </span>
+                <form class="lyop-form" action="/get-rent-estimate" method="GET" target="_blank">
+                        <div class="lyop-input">
+                                <input class="address" id="autoaddress" name="address" type="text" placeholder="<?php echo $a['placeholder']; ?>" />
+                                <span id="lyop-error-message" class="error-message" style="display:none">Address is required</span>
+                        </div>
+                        <div class="lyop-button">
+                                <button class="button button__primary"><?php echo $a['button_text']; ?></button>
+                        </div>
+                </form>
+                <script>
+                var address = null;
+                var autocomplete = null;
+                </script>
+        </div>
+<?php
+        wp_enqueue_script( 'divi-maps', 'https://maps.googleapis.com/maps/api/js?key='.$_ENV['GOOGLE_MAP_KEY'].'&libraries=places,geometry&callback=initMap', array(), true, true );
+        $lyop = ob_get_clean();
+        return $lyop;
+        
+}
+add_shortcode('onerent_lyop', 'onerent_lyop');
+function onerent_bedbath_lyop( $atts ){
+        $a = shortcode_atts( array(
+                'class' => 'onerent-lyop-bedbath',
+                'title'  => '',
+                'placeholder'   => '115 Hills Drive, San Francisco',
+                'button_text'   => 'Get free rent estimate',
+                'input_style'          => '',
+                'title_style'          => '',
+                'button_style'          => ''
+        ), $atts );
+        ob_start();        
+?>
+         <div class="onerent-lyop-bedbath lyop-form-wrapper <?php echo $a['class']; ?>">
+                <span class="lyop-title">
+                        <?php echo $a['title']; ?>
+                </span>
+                <form class="lyop-form" action="/get-rent-estimate" method="GET" target="_blank">
+                        <div class="lyop-input">
+                                <span style="<?php echo $a['title_style']; ?>" class="input-title">Property Address</span>
+                                <input class="address"  style="<?php echo $a['input_style']; ?>" id="autoaddress" name="address" type="text" placeholder="<?php echo $a['placeholder']; ?>" />
+                                <span id="lyop-error-message" class="error-message" style="display:none">Address is required</span>
+                        </div>
+                        <div class="lyop-input half">
+                                <div class="bed-input"><span style="<?php echo $a['title_style']; ?>" class="input-title">Bedrooms</span><input style="<?php echo $a['input_style']; ?>" id="bed" name="bed" type="number" placeholder="1" min="0"/> </div>
+                                <div class="bath-input"><span style="<?php echo $a['title_style']; ?>" class="input-title">Bathrooms</span><input style="<?php echo $a['input_style']; ?>" id="bath" name="bath" type="number" placeholder="1" min="0"/> </div>
+                        </div>
+                        <div class="lyop-button">
+                                <button style="<?php echo $a['button_style']; ?>"  class="button button__primary"><?php echo $a['button_text']; ?></button>
+                        </div>
+                </form>
+                <script>
+                var address = null;
+                var autocomplete = null;
+                </script>
+        </div>
+<?php
+        wp_enqueue_script( 'divi-maps', 'https://maps.googleapis.com/maps/api/js?key='.$_ENV['GOOGLE_MAP_KEY'].'&libraries=places,geometry&callback=initMap', array(), true, true );
+        $lyop = ob_get_clean();
+        return $lyop;
+        
+}
+add_shortcode('onerent_bedbath_lyop', 'onerent_bedbath_lyop');
+function price_slider( $atts, $content = null ) {
+	$a = shortcode_atts( array(
+        'min' => '1500',
+        'max'  => '7500',
+        'step' => '100',
+        'text'  => "You'd save %value% in a year with us!"
+	), $atts );
+        $a['text'] = str_replace("%value%", "<span class='rangeslider__value'>$510</span>", $a['text']);
+        ob_start(); 
+        ?>
+                <div class="rangeslider__wrapper">
+                        <div class="rangeslider__label">$2500/mo</div>
+                        <input type="range" value="2500" min="<?php echo $a['min']?>" max="<?php echo $a['max']?>"  step="<?php echo $a['step']?>" >
+                        <span class="rangeslider__start">$<?php echo $a['min']?>/month</span><span class="rangeslider__end">$<?php echo $a['max']?>/month</span>
+                        <div class="rangeslider-text"><?php echo $a['text']?></div>
+                </div>
+        <?php
+        $rangeSlider = ob_get_clean();
+        return $rangeSlider;
+	
+}
+add_shortcode('price_slider', 'price_slider');
+function custom_show_categories( $atts, $content = null ) {
+        $a = shortcode_atts( array(
+                'limit' => -1,
+                'text'  => "Categories:"
+	), $atts );
+       
+        $categories = get_the_category();
+        ob_start();
+        ?>
+        <div class="post-categories">
+                <span><?php echo $a['text']; ?></span>
+                <?php foreach($categories as $category): ?>
+                        <label class="badge badge--light-gray"><?php echo $category->cat_name; ?></label>
+                <?php endforeach; ?>
+        </div>
+        <?php
+        $showCategories = ob_get_clean();
+        return $showCategories;
+	
+}
+add_shortcode('show_categories', 'custom_show_categories');
+function simple_related_articles( $atts, $content = null ) {
+        global $post;
+        $a = shortcode_atts( array(
+                'cols'                  => 3,
+                'excerpt_count'         => 20,
+                'show_title'            => true,
+                'show_categories'       => true,
+                'show_excerpt'          => true,
+                'title'                 => 'Related Articles'
+        ), $atts );
+        
+        $relatedPosts = null;
+        $tagIds = wp_get_post_tags($post->ID, array('fields'=>'ids'));
+        
+        if(count($tagIds) > 0){
+                $args = array(
+                        'tag__in' => $tagIds,
+                        'post__not_in' => array(get_the_ID()),
+                        'posts_per_page'=> $a['cols'],
+                        'ignore_sticky_posts' => 1
+                );
+         
+                $relatedPosts = new WP_Query( $args );
+                
+        }else{
+                
+                $categories = get_the_category();
+                if($categories){
+                        $args = array(
+                                'cat' => $categories[0]->term_id,
+                                'post__not_in' => array(get_the_ID()),
+                                'posts_per_page'=> $a['cols'],
+                                'ignore_sticky_posts' => 1
+                            );
+                 
+                        $relatedPosts = new WP_Query( $args );
+                        // print_r($relatedPosts);
+                }else{
+                        $args = array(
+                                'post__not_in' => array(get_the_ID()),
+                                'posts_per_page'=> $a['cols'],
+                                'ignore_sticky_posts' => 1
+                        );
+                
+                        $relatedPosts = new WP_Query( $args );
+                }
+        }
+        ob_start();
+        ?>
+        <h6 class="related-title"><?php echo $a['title']; ?></h6>
+        <?php if($relatedPosts->post_count > 0): ?>
+        <div class="related-posts">
+                
+                <?php while( $relatedPosts->have_posts() ): $relatedPosts->the_post() ?>
+                        <article class="related-post">
+                                        <a href="<?php the_permalink()?>">
+                                                <div class="related-post-image">
+                                                        <?php if(! has_category('downloadables')): ?>
+                                                                <?php the_post_thumbnail('et-pb-portfolio-module-image'); ?>
+                                                        <?php else: ?>
+                                                                <?php the_post_thumbnail('medium'); ?>
+                                                        <?php endif; ?>
+                                                </div>
+                                        </a>
+                                        <div class="related-post-content">
+                                                <?php $meta_array = array('tags');
+                                                echo sprintf( '<p class="et_pb_title_meta_container post-categories">%1$s</p>',
+                                                        et_pb_postinfo_meta( $meta_array, 'F j, Y', esc_html__( '0 comments', 'et_builder' ), esc_html__( '1 comment', 'et_builder' ), '% ' . esc_html__( 'comments', 'et_builder' ) )
+                                                ); ?>
+                                                <h6><a href="<?php the_permalink()?>"><?php the_title(); ?></a></h6>
+                                                <?php if(has_excerpt()) the_excerpt(); else echo wpautop(truncate_post( 100, false, '', true )); ?>
+                                        </div>
+                                        <?php
+                                                $meta_array = array('author', 'date', 'read_time');
+                                                echo sprintf( '<p class="et_pb_title_meta_container">%1$s</p>',
+                                                        et_pb_postinfo_meta( $meta_array, 'F j, Y', esc_html__( '0 comments', 'et_builder' ), esc_html__( '1 comment', 'et_builder' ), '% ' . esc_html__( 'comments', 'et_builder' ) )
+                                                );
+                                        ?>
+                                
+                        </article>
+                        
+                <?php endwhile; ?>
+        </div>
+        <?php
+        endif;
+        $posts = ob_get_clean();
+        wp_reset_query();
+        return $posts;
+	
+}
+add_shortcode('related_articles', 'simple_related_articles');
+function popular_articles( $atts, $content = null ) {
+        $a = shortcode_atts( array(
+                'count'                 => 10,
+        ), $atts );
+        
+        $args = array(
+                'post__not_in' => array(get_the_ID()),
+                'posts_per_page'=>$a['count'],
+                'orderby'       => 'comment_count'
+        );
+ 
+        $popularPosts = new WP_Query( $args );
+        ob_start();
+        ?>
+        <div class="popular-posts">
+                <ul>
+                <?php while( $popularPosts->have_posts() ): $popularPosts->the_post() ?>
+                        <li><a href="<?php the_permalink()?>"><?php the_title(); ?></a></li> 
+                <?php endwhile; ?>
+                </ul>
+        </div>
+        <?php
+        $posts = ob_get_clean();
+        wp_reset_query();
+        return $posts;
+	
+}
+add_shortcode('popular_articles', 'popular_articles');
+function show_icons( $atts, $content = null ) {
+        $a = shortcode_atts( array(
+                'name'                 => '',
+                'size'                 => '16px',
+                'color'                => 'inherit',
+                'link'                 => '',
+                'target'               => '_blank'
+        ), $atts );
+        
+        
+        ob_start();
+        
+        ?>
+        <span class="icon-<?php echo $a['name']; ?>" style="color:<?php echo $a['color']; ?>; font-size:<?php echo $a['size']; ?>"></span>
+        <?php
+        
+        $icon = ob_get_clean();
+        if(!empty($a['link'])){
+                $icon = '<a href="'.$a['link'].'" target="'.$a['target'].'" >'.$icon.'</a>';
+        }
+        return $icon;
+	
+}
+add_shortcode('icons', 'show_icons');
+add_shortcode('monarch_inline', 'generate_inline_icons' );
+function generate_inline_icons() {
+        $class = "";
+        $monarch = $GLOBALS['et_monarch'];
+        $monarch_options = get_option( 'et_monarch_options' ) ? get_option( 'et_monarch_options' ) : array();
+        if ( isset( $monarch_options[ 'general_main_reset_postdata' ] ) && true == $monarch_options[ 'general_main_reset_postdata' ] ) {
+                wp_reset_postdata();
+        }
+        $display_all_button = isset( $monarch_options[ 'sharing_inline_display_all' ] ) ? $monarch_options[ 'sharing_inline_display_all' ] : false;
+        $inline_content = sprintf(
+                '<div class="et_social_inline%10$s %12$s">
+                        <div class="et_social_networks et_social_%2$s et_social_%3$s et_social_%4$s et_social_%5$s et_social_no_animation%6$s%7$s%9$s%11$s%13$s">
+                                %8$s
+                                %1$s
+                        </div>
+                </div>',
+                $monarch->get_icons_list( 'inline', '', false, $display_all_button ),
+                'auto' == $monarch_options[ 'sharing_inline_col_number' ]
+                        ? 'autowidth'
+                        : esc_attr( $monarch_options[ 'sharing_inline_col_number' ] . 'col' ),
+                esc_attr( $monarch_options[ 'sharing_inline_icon_style' ] ),
+                esc_attr( $monarch_options[ 'sharing_inline_icon_shape' ] ),
+                esc_attr( $monarch_options[ 'sharing_inline_icons_alignment' ] ), //#5
+                true == $monarch_options[ 'sharing_inline_counts' ] ? ' et_social_withcounts' : '',
+                true == $monarch_options[ 'sharing_inline_total' ] ? ' et_social_withtotalcount' : '',
+                true == $monarch_options[ 'sharing_inline_total' ]
+                        ? sprintf(
+                                '<div class="et_social_totalcount">
+                                        <span class="et_social_totalcount_count et_social_total_share" data-post_id="%2$s"></span>
+                                        <span class="et_social_totalcount_label">%1$s</span>
+                                </div>',
+                                esc_html__( 'Shares', 'Monarch' ),
+                                esc_attr( get_the_ID() )
+                        )
+                        : '',
+                true == $monarch_options[ 'sharing_inline_spacing' ] ? ' et_social_nospace' : '',
+                true == $monarch_options[ 'sharing_inline_mobile' ] ? ' et_social_mobile_off' : ' et_social_mobile_on', //#10
+                true == $monarch_options[ 'sharing_inline_network_names' ] ? ' et_social_withnetworknames' : '',
+                esc_attr( $class ),
+                esc_attr( sprintf( ' et_social_outer_%1$s', $monarch_options[ 'sharing_inline_outer_color' ] ) ) //#13
+        );
+        return $inline_content;
+}
